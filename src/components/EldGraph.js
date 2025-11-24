@@ -6,7 +6,6 @@ export default function ELDLogGraph({ dayLog, dayIndex }) {
   const gridH = height - pad;
   const rowH = gridH / 4;
 
-  // Status Y positions
   const yPos = {
     "OFF": pad + rowH * 0.5,
     "SB": pad + rowH * 1.5,
@@ -14,10 +13,8 @@ export default function ELDLogGraph({ dayLog, dayIndex }) {
     "ON": pad + rowH * 3.5,
   };
 
-  // Time to X position
   const getX = (minutes) => pad + (minutes / 1440) * gridW;
 
-  // Generate path string
   let pathD = "";
   let lastX = getX(0);
   let lastY = yPos[dayLog.entries[0]?.status || "OFF"];
@@ -30,10 +27,9 @@ export default function ELDLogGraph({ dayLog, dayIndex }) {
     if (i === 0) {
       pathD += `M ${startX} ${currentY} `;
     } else {
-      // Vertical line for status change
       pathD += `L ${startX} ${lastY} L ${startX} ${currentY} `;
     }
-    // Horizontal line for duration
+
     pathD += `L ${endX} ${currentY} `;
     
     lastX = endX;
@@ -47,11 +43,9 @@ export default function ELDLogGraph({ dayLog, dayIndex }) {
         <div className="text-xs text-gray-500">Total Distance: {Math.round(dayLog.miles)} mi</div>
       </div>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        {/* Grid Lines */}
         {[0, 1, 2, 3, 4].map(i => (
            <line key={i} x1={pad} y1={pad + i * rowH} x2={width - pad} y2={pad + i * rowH} stroke="#e5e7eb" strokeWidth="1" />
         ))}
-        {/* Hour Markers */}
         {Array.from({ length: 25 }).map((_, i) => (
           <g key={i}>
             <line x1={getX(i * 60)} y1={pad} x2={getX(i * 60)} y2={height} stroke="#e5e7eb" strokeWidth="1" />
@@ -59,17 +53,14 @@ export default function ELDLogGraph({ dayLog, dayIndex }) {
           </g>
         ))}
         
-        {/* Labels */}
         <text x={10} y={yPos.OFF + 4} fontSize="10" fontWeight="bold" fill="#374151">OFF</text>
         <text x={10} y={yPos.SB + 4} fontSize="10" fontWeight="bold" fill="#374151">SB</text>
         <text x={10} y={yPos.D + 4} fontSize="10" fontWeight="bold" fill="#374151">D</text>
         <text x={10} y={yPos.ON + 4} fontSize="10" fontWeight="bold" fill="#374151">ON</text>
 
-        {/* The Log Line */}
         <path d={pathD} stroke="#2563eb" strokeWidth="3" fill="none" />
       </svg>
       
-      {/* Text Summary */}
       <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-gray-600">
         {dayLog.entries.map((entry, i) => (
           entry.duration > 0 && (
