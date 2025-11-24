@@ -9,7 +9,7 @@ import RouteMap from './components/Map';
 import ELDLogGraph from './components/EldGraph';
 import InputField from './components/Input';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL
 
 
 const App = () => {
