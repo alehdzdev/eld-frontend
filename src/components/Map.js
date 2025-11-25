@@ -30,17 +30,45 @@ export default function RouteMap({ points = [] }) {
       L.marker(p).addTo(mapInstance.current);
     });
 
-    L.polyline(points, {
-      color: "blue",
-      weight: 4,
-      opacity: 0.8,
-    }).addTo(mapInstance.current);
+    if (points.length > 1) {
+      const waypoints = points.map(p => `${p[1]},${p[0]}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`;
 
-    mapInstance.current.fitBounds(points);
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+
+            L.polyline(coordinates, {
+              color: "blue",
+              weight: 4,
+              opacity: 0.8,
+            }).addTo(mapInstance.current);
+
+            mapInstance.current.fitBounds(coordinates);
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching route:", err);
+          L.polyline(points, {
+            color: "blue",
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 10'
+          }).addTo(mapInstance.current);
+          mapInstance.current.fitBounds(points);
+        });
+    } else if (points.length === 1) {
+      mapInstance.current.setView(points[0], 10);
+    }
 
     return () => {
-      mapInstance.current.remove();
-      mapInstance.current = null;
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
   }, [points]);
 
